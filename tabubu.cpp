@@ -5834,7 +5834,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
     int iter = 0;
     int total_iters = CFG_MAX_SEGMENT * CFG_MAX_ITER_PER_SEGMENT;
     int no_improve_iters = 0;
-    int scoring_mode_iter = 1; // 0: makespan, 1: L2 norm, 2: total time
+    int scoring_mode_iter = 0; // 0: makespan, 1: L2 norm, 2: total time
     Solution best_segment_sol = current_sol;
     double best_segment_score = scoring_mode_iter == 0 ? solution_score_makespan(current_sol) :
                                 (scoring_mode_iter == 1 ? solution_score_l2_norm(current_sol) : solution_score_total_time(current_sol));
@@ -6064,10 +6064,10 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                     scoring_mode_iter = 2;
                 }
                 else if (scoring_mode_iter == 2) {
-                    scoring_mode_iter = 1;
-                } /* else if (scoring_mode_iter == 2){
                     scoring_mode_iter = 0;
-                } */
+                } else if (scoring_mode_iter == 0){
+                    scoring_mode_iter = 1;
+                }
                 no_improve_segments = 0;
                 best_solution_score_now = scoring_mode_iter == 0 ? solution_score_makespan(best_solution) :
                                             (scoring_mode_iter == 1 ? solution_score_l2_norm(best_solution) : solution_score_total_time(best_solution));
