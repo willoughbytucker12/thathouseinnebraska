@@ -6017,7 +6017,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
              no_improve_iters = 0;
 
             // Chance to restart from best solution or do destroy and repair:
-            current_sol = destroy_random_repair_random(current_sol);
+            current_sol = destroy_worst_repair_random(current_sol);
             
             destroy_repair_count++; 
             
