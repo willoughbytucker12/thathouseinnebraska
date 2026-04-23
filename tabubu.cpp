@@ -6060,10 +6060,10 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
 
             if (no_improve_segments >= 2) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
-                /*if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 2;
+                if (scoring_mode_iter == 0) {
+                    scoring_mode_iter = 1;
                 }
-                else if (scoring_mode_iter == 2) {
+                else if (scoring_mode_iter == 1) {
                     scoring_mode_iter = 0;
                 } /* else if (scoring_mode_iter == 2){
                     scoring_mode_iter = 0;
@@ -6242,10 +6242,10 @@ int main(int argc, char* argv[]) {
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 20);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 20);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
