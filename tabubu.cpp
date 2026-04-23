@@ -5834,7 +5834,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
     int iter = 0;
     int total_iters = CFG_MAX_SEGMENT * CFG_MAX_ITER_PER_SEGMENT;
     int no_improve_iters = 0;
-    int scoring_mode_iter = 0; // 0: makespan, 1: L2 norm, 2: total time
+    int scoring_mode_iter = 1; // 0: makespan, 1: L2 norm, 2: total time
     Solution best_segment_sol = current_sol;
     double best_segment_score = scoring_mode_iter == 0 ? solution_score_makespan(current_sol) :
                                 (scoring_mode_iter == 1 ? solution_score_l2_norm(current_sol) : solution_score_total_time(current_sol));
@@ -5980,7 +5980,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             current_score = neighbor_score;
             no_improve_iters++;
         } else {
-            /* double T = T0 * pow(alpha, iter);
+/*             double T = T0 * pow(alpha, iter);
             double delta = current_score - neighbor_score;
             double ap = exp(delta / T);
             double rand_val = ((double) rand() / (RAND_MAX));
@@ -5988,8 +5988,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 current_sol = neighbor;
                 current_cost = neighbor.total_makespan;
                 current_score = neighbor_score;
-            } */
-            
+            }  */
             score[selected_neighbor] += gamma3;
             no_improve_iters++;
         }
@@ -6018,7 +6017,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
              no_improve_iters = 0;
 
             // Chance to restart from best solution or do destroy and repair:
-            /* current_sol = destroy_random_repair_random(current_sol);
+            current_sol = destroy_random_repair_random(current_sol);
             
             destroy_repair_count++; 
             
@@ -6060,14 +6059,14 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
 
             if (no_improve_segments >= 2) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
-                if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 1;
+                if (scoring_mode_iter == 1) {
+                    scoring_mode_iter = 2;
                 }
                 else if (scoring_mode_iter == 2) {
+                    scoring_mode_iter = 1;
+                } /* else if (scoring_mode_iter == 2){
                     scoring_mode_iter = 0;
-                } else if (scoring_mode_iter == 1){
-                    scoring_mode_iter = 2;
-                } 
+                } */
                 no_improve_segments = 0;
                 best_solution_score_now = scoring_mode_iter == 0 ? solution_score_makespan(best_solution) :
                                             (scoring_mode_iter == 1 ? solution_score_l2_norm(best_solution) : solution_score_total_time(best_solution));
