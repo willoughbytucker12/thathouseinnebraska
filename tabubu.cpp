@@ -6241,17 +6241,17 @@ int main(int argc, char* argv[]) {
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 2);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 2);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 2);
             CFG_KNN_K = min(CFG_KNN_K, int(n/2));
         }
     }
-    
+
     // Precompute KNN lists (if K is zero, disable by building empty adjacency)
     if (CFG_KNN_K > 0) compute_knn_lists(CFG_KNN_K); else { KNN_LIST.assign(n + 1, {}); KNN_ADJ.assign(n + 1, vector<char>(n + 1, 0)); }
 
