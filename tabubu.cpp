@@ -5629,7 +5629,7 @@ Solution destroy_worst_repair_random(Solution sol) {
 Solution destroy_random_repair_random(Solution sol) {
     unordered_set<int> to_destroy;
     std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
-    int destroy_count = static_cast<int>(n * 0.1); // Destroy 30%
+    int destroy_count = static_cast<int>(n * 0.3); // Destroy 30%
     std::uniform_int_distribution<int> dist(1, n);
     while ((int)to_destroy.size() < destroy_count) {
         int r = dist(rng);
@@ -5980,7 +5980,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             current_score = neighbor_score;
             no_improve_iters++;
         } else {
-/*             double T = T0 * pow(alpha, iter);
+             double T = T0 * pow(alpha, iter);
             double delta = current_score - neighbor_score;
             double ap = exp(delta / T);
             double rand_val = ((double) rand() / (RAND_MAX));
@@ -5988,7 +5988,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 current_sol = neighbor;
                 current_cost = neighbor.total_makespan;
                 current_score = neighbor_score;
-            }  */
+            } 
             score[selected_neighbor] += gamma3;
             no_improve_iters++;
         }
@@ -6241,10 +6241,10 @@ int main(int argc, char* argv[]) {
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 2);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 2);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
@@ -6252,6 +6252,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    //The Tortured Poet Department
     // Precompute KNN lists (if K is zero, disable by building empty adjacency)
     if (CFG_KNN_K > 0) compute_knn_lists(CFG_KNN_K); else { KNN_LIST.assign(n + 1, {}); KNN_ADJ.assign(n + 1, vector<char>(n + 1, 0)); }
 
@@ -6322,7 +6323,7 @@ int main(int argc, char* argv[]) {
         cout << "Improved Solution Cost: " << best.sol.total_makespan << "\n";
         cout << "Worst Solution Cost (top-" << TOP_K << "): " << worst_overall_cost << "\n";
         cout << "Mean Solution Cost (top-" << TOP_K << "): " << mean_overall_cost << "\n";
-        cout << "Mean Elapsed Time: " << (elapsed_seconds / (int)all_results.size()) << " seconds\n";
+        cout << "Elapsed Time: " << (elapsed_seconds) << " seconds\n";
         print_solution_stream(best.sol, cout);
         // check final feasibility
         bool final_feas = true;
@@ -6342,7 +6343,7 @@ int main(int argc, char* argv[]) {
             cout << "Final solution feasibility: INFEASIBLE\n";
         }
         string out_best = "output_solution_best.txt";
-        if (write_output_file(out_best, best.sol, best.initial_cost, elapsed_seconds / (int)all_results.size(), final_feas, worst_overall_cost, mean_overall_cost)) {
+        if (write_output_file(out_best, best.sol, best.initial_cost, elapsed_seconds, final_feas, worst_overall_cost, mean_overall_cost)) {
             cout << "Best solution written to " << out_best << "\n";
         } else {
             cout << "Failed to write best solution to " << out_best << "\n";
