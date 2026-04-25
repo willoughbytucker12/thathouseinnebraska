@@ -6251,6 +6251,7 @@ int main(int argc, char* argv[]) {
             CFG_KNN_K = min(CFG_KNN_K, int(n/2));
         }
     }
+    //The
 
     // Precompute KNN lists (if K is zero, disable by building empty adjacency)
     if (CFG_KNN_K > 0) compute_knn_lists(CFG_KNN_K); else { KNN_LIST.assign(n + 1, {}); KNN_ADJ.assign(n + 1, vector<char>(n + 1, 0)); }
