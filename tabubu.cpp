@@ -5988,7 +5988,8 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 current_sol = neighbor;
                 current_cost = neighbor.total_makespan;
                 current_score = neighbor_score;
-            } 
+            }  
+            // The Tortured Poet Department
             score[selected_neighbor] += gamma3;
             no_improve_iters++;
         }
@@ -6247,7 +6248,7 @@ int main(int argc, char* argv[]) {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 5);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
             CFG_KNN_K = min(CFG_KNN_K, int(n/2));
         }
     }
