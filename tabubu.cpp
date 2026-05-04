@@ -35,7 +35,7 @@ vd serve_truck, serve_drone; // time taken by truck and drone to serve each cust
 vi served_by_drone; //whether each customer can be served by drone or not, 1 if yes, 0 if no
 vd deadline; //customer deadlines
 vd demand; // demand[i]: demand of customer i
-double Dh = 1000.0; // truck capacity (all trucks) (kg)
+double Dh = 500.0; // truck capacity (all trucks) (kg)
 double vmax = 15.6464; // truck base speed (m/s)
 int L = 24; //number of time segments in a day
 //vd time_segment = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; // time segment boundaries in hours
@@ -84,10 +84,10 @@ const int NUM_OF_INITIAL_SOLUTIONS = 200;
 const int MAX_SEGMENT = 200;
 const int MAX_NO_IMPROVE = 1000;
 const int MAX_ITER_PER_SEGMENT = 1000;
-const double gamma1 = 0.5;
-const double gamma2 = 0.3;
+const double gamma1 = 0.3;
+const double gamma2 = 0.2;
 const double gamma3 = 0.1;
-const double gamma4 = 0.3;
+const double gamma4 = 0.6;
 
 // Runtime-configurable search knobs (initialized from compile-time defaults)
 static int CFG_NUM_INITIAL = NUM_OF_INITIAL_SOLUTIONS;
@@ -113,7 +113,6 @@ double alpha = 0.9998; // cooling rate for simulated annealing
 // Destroy and repair helper
 vvd edge_records; // edge_records[i][j]: stores working times for edge (i,j)
 const double DESTROY_RATE = 0.3; // fraction of customers to remove during destroy phase
-const int EJECTION_CHAIN_ITERS = 20; // number of ejection chain applications during destroy-repair
 
 struct Solution {
     vvi truck_routes; //truck_routes[i]: sequence of customers served by truck i
@@ -5834,7 +5833,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
     int iter = 0;
     int total_iters = CFG_MAX_SEGMENT * CFG_MAX_ITER_PER_SEGMENT;
     int no_improve_iters = 0;
-    int scoring_mode_iter = 1; // 0: makespan, 1: L2 norm, 2: total time
+    int scoring_mode_iter = 0; // 0: makespan, 1: L2 norm, 2: total time
     Solution best_segment_sol = current_sol;
     double best_segment_score = scoring_mode_iter == 0 ? solution_score_makespan(current_sol) :
                                 (scoring_mode_iter == 1 ? solution_score_l2_norm(current_sol) : solution_score_total_time(current_sol));
@@ -5852,6 +5851,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
     cout << "Initial Cost: " << best_solution_score_now << "\n";
 
     double current_score = best_solution_score_now;
+    int segments_per_mode[3] = {0, 0, 0};
     while (iter < total_iters) {
         if (CFG_TIME_LIMIT_SEC > 0.0) {
             double elapsed = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - ts_start).count();
@@ -5980,7 +5980,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             current_score = neighbor_score;
             no_improve_iters++;
         } else {
-             double T = T0 * pow(alpha, iter);
+            /*  double T = T0 * pow(alpha, iter);
             double delta = current_score - neighbor_score;
             double ap = exp(delta / T);
             double rand_val = ((double) rand() / (RAND_MAX));
@@ -5988,7 +5988,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 current_sol = neighbor;
                 current_cost = neighbor.total_makespan;
                 current_score = neighbor_score;
-            }  
+            }   */
             // The Tortured Poet Department
             score[selected_neighbor] += gamma3;
             no_improve_iters++;
@@ -6018,9 +6018,9 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
              no_improve_iters = 0;
 
             // Chance to restart from best solution or do destroy and repair:
-            current_sol = destroy_worst_repair_random(current_sol);
+             /* current_sol = destroy_worst_repair_random(current_sol);
             
-            destroy_repair_count++; 
+            destroy_repair_count++;  */ 
             
             current_sol = recalculate_solution(current_sol);
             cout << "Applied perturbation at iter " << iter << ", new makespan: " << current_sol.total_makespan << "\n"; 
@@ -6039,7 +6039,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
 
         // Periodic Weight & Segment Mode Update
         if (iter % CFG_MAX_ITER_PER_SEGMENT == 0) {
-
+            segments_per_mode[scoring_mode_iter]++;
             cout << "=== End of Segment " << (iter / CFG_MAX_ITER_PER_SEGMENT) << " ===\n";
             cout << "Best Current Solution Score: " << best_solution_score_now << " with makespan " << best_solution.total_makespan << "\n";
             cout << "Current Solution Score: " << current_score << " with makespan " << current_sol.total_makespan << "\n";
@@ -6058,13 +6058,19 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 no_improve_segments++;
             }
 
+/*             if (scoring_mode_iter == 2) {
+                scoring_mode_iter = 0;
+                no_improve_segments = 0;
+                best_solution_score_now = solution_score_makespan(best_solution);
+            } */
+
             if (no_improve_segments >= 2) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
-                if (scoring_mode_iter == 1) {
-                    scoring_mode_iter = 2;
+                if (scoring_mode_iter == 0) {
+                    scoring_mode_iter = 0;
                 }
                 else if (scoring_mode_iter == 2) {
-                    scoring_mode_iter = 1;
+                    scoring_mode_iter = 0;
                 } /* else if (scoring_mode_iter == 2){
                     scoring_mode_iter = 0;
                 } */
@@ -6117,7 +6123,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
     } */
 
     //cout << "Destroy/Repair applied " << destroy_repair_count << " times during the search.\n";
-
+    cout << "Segments per mode: Makespan " << segments_per_mode[0] << ", L2 Norm " << segments_per_mode[1] << ", Total Time " << segments_per_mode[2] << "\n";
     if (best_feasible_makespan < std::numeric_limits<double>::infinity()) {
         return best_feasible_solution;
     }
@@ -6236,16 +6242,16 @@ int main(int argc, char* argv[]) {
         int tuned_segments       = compute_segment_count(tuned_total_iters, tuned_iters_per_seg);
         CFG_MAX_ITER_PER_SEGMENT = min(CFG_MAX_ITER_PER_SEGMENT, tuned_iters_per_seg);
         CFG_MAX_SEGMENT          = min(CFG_MAX_SEGMENT, tuned_segments);
-        CFG_MAX_NO_IMPROVE       = 2 * CFG_MAX_ITER_PER_SEGMENT;
+        CFG_MAX_NO_IMPROVE       = 4 * CFG_MAX_ITER_PER_SEGMENT;
         cout << "Search config: total_iters=" << (1LL * CFG_MAX_SEGMENT * CFG_MAX_ITER_PER_SEGMENT)
              << " (segments=" << CFG_MAX_SEGMENT
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 13);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 13);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
