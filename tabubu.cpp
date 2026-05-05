@@ -6067,7 +6067,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             if (no_improve_segments >= 2) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
                 if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 2;
+                    scoring_mode_iter = 0;
                 }
                 else if (scoring_mode_iter == 2) {
                     scoring_mode_iter = 0;
@@ -6329,7 +6329,7 @@ int main(int argc, char* argv[]) {
         cout << "Improved Solution Cost: " << best.sol.total_makespan << "\n";
         cout << "Worst Solution Cost (top-" << TOP_K << "): " << worst_overall_cost << "\n";
         cout << "Mean Solution Cost (top-" << TOP_K << "): " << mean_overall_cost << "\n";
-        cout << "Elapsed Time: " << (elapsed_seconds) << " seconds\n";
+        cout << "Mean elapsed Time: " << (elapsed_seconds / all_results.size()) << " seconds\n";
         print_solution_stream(best.sol, cout);
         // check final feasibility
         bool final_feas = true;
@@ -6349,7 +6349,7 @@ int main(int argc, char* argv[]) {
             cout << "Final solution feasibility: INFEASIBLE\n";
         }
         string out_best = "output_solution_best.txt";
-        if (write_output_file(out_best, best.sol, best.initial_cost, elapsed_seconds, final_feas, worst_overall_cost, mean_overall_cost)) {
+        if (write_output_file(out_best, best.sol, best.initial_cost, elapsed_seconds / all_results.size(), final_feas, worst_overall_cost, mean_overall_cost)) {
             cout << "Best solution written to " << out_best << "\n";
         } else {
             cout << "Failed to write best solution to " << out_best << "\n";
