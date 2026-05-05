@@ -84,8 +84,8 @@ const int NUM_OF_INITIAL_SOLUTIONS = 200;
 const int MAX_SEGMENT = 200;
 const int MAX_NO_IMPROVE = 1000;
 const int MAX_ITER_PER_SEGMENT = 1000;
-const double gamma1 = 0.5;
-const double gamma2 = 0.3;
+const double gamma1 = 0.3;
+const double gamma2 = 0.2;
 const double gamma3 = 0.1;
 const double gamma4 = 0.3;
 
@@ -6058,11 +6058,11 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 no_improve_segments++;
             }
 
-            if (scoring_mode_iter == 2) {
+            /* if (scoring_mode_iter == 2) {
                 scoring_mode_iter = 0;
                 no_improve_segments = 0;
                 best_solution_score_now = solution_score_makespan(best_solution);
-            }
+            } */
 
             if (no_improve_segments >= 2) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
@@ -6248,10 +6248,10 @@ int main(int argc, char* argv[]) {
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 15);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 16);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 15);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 16);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
