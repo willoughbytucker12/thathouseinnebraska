@@ -87,7 +87,7 @@ const int MAX_ITER_PER_SEGMENT = 1000;
 const double gamma1 = 0.5;
 const double gamma2 = 0.3;
 const double gamma3 = 0.1;
-const double gamma4 = 0.6;
+const double gamma4 = 0.3;
 
 // Runtime-configurable search knobs (initialized from compile-time defaults)
 static int CFG_NUM_INITIAL = NUM_OF_INITIAL_SOLUTIONS;
@@ -5554,7 +5554,7 @@ Solution repair_solution_common(Solution sol, const unordered_set<int>& to_destr
 
 Solution destroy_worst_repair_random(Solution sol) {
     unordered_set<int> to_destroy;
-    int destroy_count = static_cast<int>(n * 0.1); // Destroy 30%
+    int destroy_count = static_cast<int>(n * 0.2); // Destroy 30%
     
     Solution current_sol = sol;
     std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -5896,7 +5896,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
         //selected_neighbor = rand() % NUM_NEIGHBORHOODS;
 
         //Change it to round-robin/cyclic for testing
-        //selected_neighbor = iter % NUM_NEIGHBORHOODS;
+        selected_neighbor = iter % NUM_NEIGHBORHOODS;
         count[selected_neighbor]++;
 
         
@@ -6012,31 +6012,6 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
         
         update_penalties(current_sol);
 
-        // Perturbation (Destroy/Repair)
-        if (no_improve_iters >= CFG_MAX_NO_IMPROVE) {
-            cout << "No improve at iter " << iter << " with current score " << current_score << " and makespan " << current_sol.total_makespan << "\n";
-             no_improve_iters = 0;
-
-            // Chance to restart from best solution or do destroy and repair:
-             /* current_sol = destroy_worst_repair_random(current_sol);
-            
-            destroy_repair_count++;  */ 
-            
-            current_sol = recalculate_solution(current_sol);
-            cout << "Applied perturbation at iter " << iter << ", new makespan: " << current_sol.total_makespan << "\n"; 
-            no_improve_iters = 0;
-            
-            // Clear Tabu Lists
-            tabu_list_10.clear();
-            tabu_list_11.clear();
-            tabu_list_20.clear();
-            tabu_list_2opt.clear();
-            tabu_list_2opt_star.clear();
-            tabu_list_22.clear();
-            tabu_list_21.clear();
-            tabu_list_ejection.clear();
-        }
-
         // Periodic Weight & Segment Mode Update
         if (iter % CFG_MAX_ITER_PER_SEGMENT == 0) {
             segments_per_mode[scoring_mode_iter]++;
@@ -6058,25 +6033,36 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 no_improve_segments++;
             }
 
-            /* if (scoring_mode_iter == 2) {
+            if (scoring_mode_iter == 2) {
                 scoring_mode_iter = 0;
-                no_improve_segments = 0;
                 best_solution_score_now = solution_score_makespan(best_solution);
-            } */
+            }
 
-            if (no_improve_segments >= 2) {
+            if (no_improve_segments % 4 == 2 && no_improve_segments > 0) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
                 if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 0;
+                    scoring_mode_iter = 2;
                 }
                 else if (scoring_mode_iter == 2) {
                     scoring_mode_iter = 0;
-                } /* else if (scoring_mode_iter == 2){
-                    scoring_mode_iter = 0;
-                } */
-                no_improve_segments = 0;
+                }
                 best_solution_score_now = scoring_mode_iter == 0 ? solution_score_makespan(best_solution) :
                                             (scoring_mode_iter == 1 ? solution_score_l2_norm(best_solution) : solution_score_total_time(best_solution));
+            }
+            if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
+                // If no improvement for 4 consecutive segments, destroy and repair;
+                current_sol = destroy_random_repair_random(current_sol);
+                current_sol = recalculate_solution(current_sol);
+                current_score = best_solution_score_now;
+                cout << "No improvement for " << no_improve_segments << " segments, applying perturbation. New makespan: " << current_sol.total_makespan << "\n";
+                tabu_list_10.clear();
+                tabu_list_11.clear();
+                tabu_list_20.clear();
+                tabu_list_2opt.clear();
+                tabu_list_2opt_star.clear();
+                tabu_list_22.clear();
+                tabu_list_21.clear();
+                tabu_list_ejection.clear();
             }
 
             // Update weights based on scores
@@ -6248,10 +6234,10 @@ int main(int argc, char* argv[]) {
              << ", iters_per_seg=" << CFG_MAX_ITER_PER_SEGMENT
              << ", no_improve=" << CFG_MAX_NO_IMPROVE << ")\n";
         if (n <= 20) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 16);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else if (n <= 200) {
-            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 16);
+            CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 10);
             CFG_KNN_K = min(CFG_KNN_K, int(n));
         } else {
             CFG_NUM_INITIAL = min(CFG_NUM_INITIAL, 1);
