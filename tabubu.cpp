@@ -6156,7 +6156,7 @@ void print_distance_matrix(){
 static int compute_total_iter_budget(int customer_count, int neighborhood_count) {
     // n * K * ceil(sqrt(n)): each neighborhood gets one sqrt(n)-depth pass over all customers
     int sqrt_n = max(1, (int)ceil(sqrt((double)customer_count)));
-    return max(1, customer_count * neighborhood_count * sqrt_n);
+    return max(1, customer_count * neighborhood_count * sqrt_n) * 2;
 }
 
 static int compute_iters_per_segment(int customer_count, int neighborhood_count) {
