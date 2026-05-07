@@ -6043,7 +6043,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             if (no_improve_segments % 2 == 0 && no_improve_segments > 0) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
                 if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 2;
+                    scoring_mode_iter = 0;
                 }
                 else if (scoring_mode_iter == 2) {
                     scoring_mode_iter = 0;
@@ -6053,7 +6053,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 best_segment_sol = best_solution;
                 best_segment_score = best_solution_score_now;
             }
-            if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
+            /* if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
                 // If no improvement for 4 consecutive segments, destroy and repair;
                 current_sol = destroy_random_repair_random(current_sol);
                 current_sol = recalculate_solution(current_sol);
@@ -6067,7 +6067,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 tabu_list_22.clear();
                 tabu_list_21.clear();
                 tabu_list_ejection.clear();
-            } 
+            }  */
 
             // Update weights based on scores
             for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {

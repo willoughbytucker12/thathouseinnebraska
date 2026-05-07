@@ -2,7 +2,7 @@ Initial solution cost: 6884.415861
 Improved solution cost: 4003.717830
 Worst solution cost: 5972.930585
 Mean solution cost: 4641.296237
-Mean elapsed time: 7.258286 seconds
+Mean elapsed time: 7.413553 seconds
 Final solution feasibility: FEASIBLE
 Solution Details:
 Truck Routes:
