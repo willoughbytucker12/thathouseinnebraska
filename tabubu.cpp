@@ -5896,8 +5896,8 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
         //selected_neighbor = rand() % NUM_NEIGHBORHOODS;
 
         //Change it to round-robin/cyclic for testing
-        selected_neighbor = iter % NUM_NEIGHBORHOODS;
-        count[selected_neighbor]++;
+        /* selected_neighbor = iter % NUM_NEIGHBORHOODS;
+        count[selected_neighbor]++; */
 
         
         // Local Search
@@ -6038,10 +6038,10 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 best_solution_score_now = solution_score_makespan(best_solution);
             }
 
-            if (no_improve_segments % 4 == 2 && no_improve_segments > 0) {
+            if (no_improve_segments % 2 == 0 && no_improve_segments > 0) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
                 if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 2;
+                    scoring_mode_iter = 0;
                 }
                 else if (scoring_mode_iter == 2) {
                     scoring_mode_iter = 0;
@@ -6049,7 +6049,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 best_solution_score_now = scoring_mode_iter == 0 ? solution_score_makespan(best_solution) :
                                             (scoring_mode_iter == 1 ? solution_score_l2_norm(best_solution) : solution_score_total_time(best_solution));
             }
-            if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
+            /* if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
                 // If no improvement for 4 consecutive segments, destroy and repair;
                 current_sol = destroy_random_repair_random(current_sol);
                 current_sol = recalculate_solution(current_sol);
@@ -6063,7 +6063,7 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
                 tabu_list_22.clear();
                 tabu_list_21.clear();
                 tabu_list_ejection.clear();
-            }
+            } */
 
             // Update weights based on scores
             for (int i = 0; i < NUM_NEIGHBORHOODS; ++i) {
@@ -6152,7 +6152,7 @@ void print_distance_matrix(){
 static int compute_total_iter_budget(int customer_count, int neighborhood_count) {
     // n * K * ceil(sqrt(n)): each neighborhood gets one sqrt(n)-depth pass over all customers
     int sqrt_n = max(1, (int)ceil(sqrt((double)customer_count)));
-    return max(1, customer_count * neighborhood_count * sqrt_n);
+    return max(1, customer_count * neighborhood_count * sqrt_n) * 2;
 }
 
 static int compute_iters_per_segment(int customer_count, int neighborhood_count) {
