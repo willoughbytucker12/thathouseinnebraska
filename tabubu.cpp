@@ -5554,7 +5554,7 @@ Solution repair_solution_common(Solution sol, const unordered_set<int>& to_destr
 
 Solution destroy_worst_repair_random(Solution sol) {
     unordered_set<int> to_destroy;
-    int destroy_count = static_cast<int>(n * 0.2); // Destroy 30%
+    int destroy_count = static_cast<int>(n * 0.3); // Destroy 30%
     
     Solution current_sol = sol;
     std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
@@ -5628,7 +5628,7 @@ Solution destroy_worst_repair_random(Solution sol) {
 Solution destroy_random_repair_random(Solution sol) {
     unordered_set<int> to_destroy;
     std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
-    int destroy_count = static_cast<int>(n * 0.1); // Destroy 30%
+    int destroy_count = static_cast<int>(n * 0.3); // Destroy 30%
     std::uniform_int_distribution<int> dist(1, n);
     while ((int)to_destroy.size() < destroy_count) {
         int r = dist(rng);
@@ -5896,8 +5896,8 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
         //selected_neighbor = rand() % NUM_NEIGHBORHOODS;
 
         //Change it to round-robin/cyclic for testing
-        // selected_neighbor = iter % NUM_NEIGHBORHOODS;
-        count[selected_neighbor]++; 
+        //selected_neighbor = iter % NUM_NEIGHBORHOODS;
+        count[selected_neighbor]++;
 
         
         // Local Search
@@ -6036,22 +6036,26 @@ Solution tabu_search(const Solution& initial_solution, int num_initial_sol,  vec
             if (scoring_mode_iter == 2) {
                 scoring_mode_iter = 0;
                 best_solution_score_now = solution_score_makespan(best_solution);
+                best_segment_sol = best_solution;
+                best_segment_score = best_solution_score_now;
             }
 
             if (no_improve_segments % 2 == 0 && no_improve_segments > 0) {
                 // If no improvement for 2 consecutive segments, switch scoring mode to encourage different search behavior
                 if (scoring_mode_iter == 0) {
-                    scoring_mode_iter = 0;
+                    scoring_mode_iter = 2;
                 }
                 else if (scoring_mode_iter == 2) {
                     scoring_mode_iter = 0;
                 }
                 best_solution_score_now = scoring_mode_iter == 0 ? solution_score_makespan(best_solution) :
                                             (scoring_mode_iter == 1 ? solution_score_l2_norm(best_solution) : solution_score_total_time(best_solution));
+                best_segment_sol = best_solution;
+                best_segment_score = best_solution_score_now;
             }
             /* if (no_improve_segments % 4 == 0 && no_improve_segments > 0) {
                 // If no improvement for 4 consecutive segments, destroy and repair;
-                current_sol = destroy_random_repair_random(current_sol);
+                current_sol = destroy_worst_repair_random(current_sol);
                 current_sol = recalculate_solution(current_sol);
                 current_score = best_solution_score_now;
                 cout << "No improvement for " << no_improve_segments << " segments, applying perturbation. New makespan: " << current_sol.total_makespan << "\n";
@@ -6152,7 +6156,7 @@ void print_distance_matrix(){
 static int compute_total_iter_budget(int customer_count, int neighborhood_count) {
     // n * K * ceil(sqrt(n)): each neighborhood gets one sqrt(n)-depth pass over all customers
     int sqrt_n = max(1, (int)ceil(sqrt((double)customer_count)));
-    return max(1, customer_count * neighborhood_count * sqrt_n) * 2;
+    return max(1, customer_count * neighborhood_count * sqrt_n);
 }
 
 static int compute_iters_per_segment(int customer_count, int neighborhood_count) {
